@@ -1,4 +1,5 @@
-#pragma once
+#ifndef WEAK_PTR_H_
+#define WEAK_PTR_H_
 
 #include <memory>
 #include "shared_ptr.h"
@@ -164,3 +165,5 @@ shared_ptr<T> weak_ptr<T>::lock() const noexcept
     return shared_ptr<T>();
   return shared_ptr<T>(cblock, ptr);
 }
+
+#endif /* WEAK_PTR_H_ */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef CONTROL_BLOCK_H_
+#define CONTROL_BLOCK_H_
 
 #include <utility>
 #include <type_traits>
@@ -79,3 +80,5 @@ void inplace_control_block<T>::delete_object() noexcept
 {
   reinterpret_cast<T *>(&stg)->~T();
 }
+
+#endif /* CONTROL_BLOCK_H_ */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHARED_PTR_H_
+#define SHARED_PTR_H_
 
 #include "control_block.h"
 #include <memory>
@@ -305,3 +306,5 @@ shared_ptr<T> make_shared(Args&&... args)
   res.ptr = reinterpret_cast<T *>(&cblock->stg);
   return res;
 }
+
+#endif /* SHARED_PTR_H_ */
