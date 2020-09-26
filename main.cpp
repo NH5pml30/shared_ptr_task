@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include "shared_ptr.h"
+#include "weak_ptr.h"
 #include "test_object.h"
 
 template <typename T>
