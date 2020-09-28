@@ -174,7 +174,7 @@ template<typename Y, class Deleter>
 shared_ptr<T>::shared_ptr(Y *ptr, Deleter d) : ptr(ptr) {
   try
   {
-    cblock = new regular_control_block<Y, Deleter>(ptr, d);
+    cblock = new regular_control_block<Y, Deleter>(ptr, std::move(d));
   }
   catch (const std::exception &e)
   {
@@ -225,7 +225,7 @@ template<typename T>
 template<typename Y>
 shared_ptr<T> & shared_ptr<T>::operator=(shared_ptr<Y> &&other) noexcept
 {
-  if (&other != this)
+  if (cblock != other.cblock)
   {
     shared_ptr<T>().swap(*this);
     return swap(other);
@@ -264,7 +264,7 @@ template<typename T>
 template<typename Y, class Deleter>
 void shared_ptr<T>::reset(Y *ptr, Deleter d)
 {
-  shared_ptr<T>(ptr, d).swap(*this);
+  shared_ptr<T>(ptr, std::move(d)).swap(*this);
 }
 
 template<typename T>
