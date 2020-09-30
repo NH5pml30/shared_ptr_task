@@ -15,33 +15,26 @@ struct control_block
   void del_weak() noexcept;
 
   size_t ref_count() const noexcept;
-  size_t weak_ref_count() const noexcept;
-
-  static void delete_this(control_block *cb) noexcept;
 
   virtual void delete_object() noexcept = 0;
 protected:
   virtual ~control_block() = default;
 
 private:
-  size_t n_shared_refs = 1, n_weak_refs = 0;
+  size_t n_shared_refs = 1, n_weak_refs = 1;
 };
 
 template<typename T, class Deleter>
-struct regular_control_block final : control_block
+struct regular_control_block final : control_block, Deleter
 {
   explicit regular_control_block(T *ptr, Deleter d);
   void delete_object() noexcept override;
 private:
   T *ptr;
-  Deleter d;
 };
 
 template<typename T>
 class shared_ptr;
-
-template<typename T, typename ...Args>
-shared_ptr<T> make_shared(Args&&... args);
 
 template<typename T>
 struct inplace_control_block final : control_block
@@ -51,21 +44,18 @@ struct inplace_control_block final : control_block
 
   void delete_object() noexcept override;
 
-  template<typename Y, typename ...Args>
-  friend shared_ptr<Y> make_shared(Args&&... args);
-private:
   typename std::aligned_storage<sizeof(T), alignof(T)>::type stg;
 };
 
 template<typename T, class Deleter>
-regular_control_block<T, Deleter>::regular_control_block(T * ptr, Deleter d) : ptr(ptr), d(d)
+regular_control_block<T, Deleter>::regular_control_block(T * ptr, Deleter d) : Deleter(std::move(d)), ptr(ptr)
 {
 }
 
 template<typename T, class Deleter>
 void regular_control_block<T, Deleter>::delete_object() noexcept
 {
-  d(ptr);
+  Deleter::operator()(ptr);
 }
 
 template<typename T>

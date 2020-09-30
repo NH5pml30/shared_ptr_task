@@ -42,8 +42,8 @@ private:
   template<typename Y>
   weak_ptr(weak_ptr<Y> &&other, int) noexcept;
 
-  template<typename Y>
-  weak_ptr<Y> & swap(weak_ptr<Y> &other);
+  template<typename Y, typename U>
+  friend void swap(weak_ptr<Y> &left, weak_ptr<U> &right) noexcept;
 };
 
 template<typename T>
@@ -103,13 +103,11 @@ weak_ptr<T> & weak_ptr<T>::operator=(const weak_ptr &other) noexcept
   return operator=<T>(other);
 }
 
-template<typename T>
-template<typename Y>
-weak_ptr<Y> & weak_ptr<T>::swap(weak_ptr<Y> &other)
+template<typename T, typename Y>
+void swap(weak_ptr<T> &left, weak_ptr<Y> &right) noexcept
 {
-  std::swap(cblock, other.cblock);
-  std::swap(ptr, other.ptr);
-  return *this;
+  std::swap(left.cblock, right.cblock);
+  std::swap(left.ptr, right.ptr);
 }
 
 
@@ -117,7 +115,8 @@ template<typename T>
 template<typename Y>
 weak_ptr<T> & weak_ptr<T>::operator=(const weak_ptr<Y> &other) noexcept
 {
-  weak_ptr<T>(other).swap(*this);
+  weak_ptr<T> copy(other);
+  swap(*this, copy);
   return *this;
 }
 
@@ -133,8 +132,9 @@ weak_ptr<T> & weak_ptr<T>::operator=(weak_ptr<Y> &&other) noexcept
 {
   if (&other != this)
   {
-    weak_ptr<T>().swap(*this);
-    return swap(other);
+    weak_ptr<T> empty;
+    swap(*this, empty);
+    swap(other, *this);
   }
   return *this;
 }
@@ -145,17 +145,15 @@ weak_ptr<T>::~weak_ptr()
   if (cblock != nullptr)
   {
     cblock->del_weak();
-    if (cblock->weak_ref_count() == 0 && cblock->ref_count() == 0)
-    {
-      control_block::delete_this(cblock);
-    }
   }
 }
 
 template<typename T>
 void weak_ptr<T>::reset() noexcept
 {
-  weak_ptr<T>().swap(*this);
+  weak_ptr<T> empty;
+  swap(*this, empty);
+  return *this;
 }
 
 template<typename T>
