@@ -188,7 +188,8 @@ shared_ptr<T>::shared_ptr(Y *ptr, Deleter d) : ptr(ptr) {
 
 template<typename T>
 template<class Deleter>
-shared_ptr<T>::shared_ptr(std::nullptr_t, Deleter d) : shared_ptr((T *)nullptr, std::move(d)) {}
+shared_ptr<T>::shared_ptr(std::nullptr_t, Deleter d) :
+    shared_ptr(static_cast<T *>(nullptr), std::move(d)) {}
 
 template<typename T>
 template<typename Y>
