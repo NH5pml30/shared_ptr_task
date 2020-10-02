@@ -37,10 +37,6 @@ private:
   T *ptr = nullptr;
 
   weak_ptr(control_block *cblock, T *ptr) noexcept;
-  template<typename Y>
-  weak_ptr(const weak_ptr<Y> &other, int) noexcept;
-  template<typename Y>
-  weak_ptr(weak_ptr<Y> &&other, int) noexcept;
 
   template<typename Y, typename U>
   friend void swap(weak_ptr<Y> &left, weak_ptr<U> &right) noexcept;
@@ -57,13 +53,23 @@ weak_ptr<T>::weak_ptr(control_block *cblock, T *ptr) noexcept : cblock(cblock), 
 
 template<typename T>
 template<typename Y>
-weak_ptr<T>::weak_ptr(const weak_ptr<Y> &other, int) noexcept : weak_ptr(other.cblock, other.ptr)
+weak_ptr<T>::weak_ptr(const shared_ptr<Y> &other) noexcept : weak_ptr(other.cblock, other.ptr)
+{
+}
+
+template<typename T>
+weak_ptr<T>::weak_ptr(const weak_ptr &other) noexcept : weak_ptr(other.cblock, other.ptr)
 {
 }
 
 template<typename T>
 template<typename Y>
-weak_ptr<T>::weak_ptr(weak_ptr<Y> &&other, int) noexcept : cblock(other.cblock), ptr(other.ptr)
+weak_ptr<T>::weak_ptr(const weak_ptr<Y> &other) noexcept : weak_ptr(other.cblock, other.ptr)
+{
+}
+
+template<typename T>
+weak_ptr<T>::weak_ptr(weak_ptr &&other) noexcept : cblock(other.cblock), ptr(other.ptr)
 {
   other.cblock = nullptr;
   other.ptr = nullptr;
@@ -71,30 +77,10 @@ weak_ptr<T>::weak_ptr(weak_ptr<Y> &&other, int) noexcept : cblock(other.cblock),
 
 template<typename T>
 template<typename Y>
-weak_ptr<T>::weak_ptr(const shared_ptr<Y> &other) noexcept : weak_ptr(other.cblock, other.ptr)
+weak_ptr<T>::weak_ptr(weak_ptr<Y> &&other) noexcept : cblock(other.cblock), ptr(other.ptr)
 {
-}
-
-template<typename T>
-weak_ptr<T>::weak_ptr(const weak_ptr &other) noexcept : weak_ptr(other, 0)
-{
-}
-
-template<typename T>
-template<typename Y>
-weak_ptr<T>::weak_ptr(const weak_ptr<Y> &other) noexcept : weak_ptr(other, 0)
-{
-}
-
-template<typename T>
-weak_ptr<T>::weak_ptr(weak_ptr &&other) noexcept : weak_ptr(std::move(other), 0)
-{
-}
-
-template<typename T>
-template<typename Y>
-weak_ptr<T>::weak_ptr(weak_ptr<Y> &&other) noexcept : weak_ptr(std::move(other), 0)
-{
+  other.cblock = nullptr;
+  other.ptr = nullptr;
 }
 
 template<typename T>

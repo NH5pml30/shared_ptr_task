@@ -79,12 +79,6 @@ private:
   template<typename Y>
   shared_ptr(control_block *cblock, Y *ptr) noexcept;
 
-  template<typename Y>
-  shared_ptr(const shared_ptr<Y> &other, int) noexcept;
-
-  template<typename Y>
-  shared_ptr(shared_ptr<Y> &&other, int) noexcept;
-
   template<typename Y, typename U>
   friend void swap(shared_ptr<Y> &left, shared_ptr<U> &right) noexcept;
 
@@ -145,20 +139,6 @@ shared_ptr<T>::shared_ptr(control_block *cblock, Y *ptr) noexcept : cblock(cbloc
 
 template<typename T>
 template<typename Y>
-shared_ptr<T>::shared_ptr(const shared_ptr<Y> &other, int) noexcept : shared_ptr(other.cblock, other.ptr)
-{
-}
-
-template<typename T>
-template<typename Y>
-shared_ptr<T>::shared_ptr(shared_ptr<Y> &&other, int) noexcept : cblock(other.cblock), ptr(other.ptr)
-{
-  other.cblock = nullptr;
-  other.ptr = nullptr;
-}
-
-template<typename T>
-template<typename Y>
 shared_ptr<T>::shared_ptr(Y *ptr) : shared_ptr(ptr, std::default_delete<Y>())
 {
 }
@@ -167,25 +147,29 @@ template<typename T>
 shared_ptr<T>::shared_ptr(std::nullptr_t) noexcept {}
 
 template<typename T>
-shared_ptr<T>::shared_ptr(const shared_ptr &other) noexcept : shared_ptr(other, 0)
+shared_ptr<T>::shared_ptr(const shared_ptr &other) noexcept : shared_ptr(other.cblock, other.ptr)
 {
 }
 
 template<typename T>
 template<typename Y>
-shared_ptr<T>::shared_ptr(const shared_ptr<Y> &other) noexcept : shared_ptr(other, 0)
+shared_ptr<T>::shared_ptr(const shared_ptr<Y> &other) noexcept : shared_ptr(other.cblock, other.ptr)
 {
 }
 
 template<typename T>
-shared_ptr<T>::shared_ptr(shared_ptr &&other) noexcept : shared_ptr(std::move(other), 0)
+shared_ptr<T>::shared_ptr(shared_ptr &&other) noexcept : cblock(other.cblock), ptr(other.ptr)
 {
+  other.cblock = nullptr;
+  other.ptr = nullptr;
 }
 
 template<typename T>
 template<typename Y>
-shared_ptr<T>::shared_ptr(shared_ptr<Y> &&other) noexcept : shared_ptr(std::move(other), 0)
+shared_ptr<T>::shared_ptr(shared_ptr<Y> &&other) noexcept : cblock(other.cblock), ptr(other.ptr)
 {
+  other.cblock = nullptr;
+  other.ptr = nullptr;
 }
 
 template<typename T>
