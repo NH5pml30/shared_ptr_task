@@ -181,7 +181,10 @@ shared_ptr<T>::shared_ptr(Y *ptr, Deleter d) : ptr(ptr) {
   }
   catch (const std::exception &e)
   {
-    delete ptr;
+    // The call to the allocation function is sequenced before (since C++17)
+    // the evaluation of the constructor arguments in a new-expression
+    // (so d is not moved yet)
+    d(ptr);
     throw;
   }
 }
